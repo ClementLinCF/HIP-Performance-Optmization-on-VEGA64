@@ -29,8 +29,7 @@ All the tests are based on AMD MI25 radeon instict and AMD ROCm.
 #define PROTECT_BITS  (0xFFFF0000)
 
 __global__ void
-test_kernel(hipLaunchParm lp,
-	int* __restrict__ buf, int protectBits, int shrinkBits)
+test_kernel( int* __restrict__ buf, int protectBits, int shrinkBits)
 {
 
 	int x = hipBlockDim_x * hipBlockIdx_x + hipThreadIdx_x;
@@ -76,7 +75,7 @@ int main() {
 	HIP_ASSERT(hipMalloc((void**)& deviceA, NUM * sizeof(int)));
 	HIP_ASSERT(hipMemcpy(deviceA, hostA, NUM * sizeof(int), hipMemcpyHostToDevice));
 
-	hipLaunchKernel(test_kernel,
+	hipLaunchKernelGGL(test_kernel,
 		dim3(1, 1, 1),
 		dim3(1, 1, 1),
 		0, 0,
@@ -84,7 +83,7 @@ int main() {
 
 	for (int i = 32; i < 64 * 1024; i = i << 1) {
 		hipEventRecord(start, NULL);
-		hipLaunchKernel(test_kernel,
+		hipLaunchKernelGGL(test_kernel,
 			dim3(NUM/THREADS_PER_BLOCK_X, 1, 1),
 			dim3(THREADS_PER_BLOCK_X, 1, 1),
 			0, 0,
